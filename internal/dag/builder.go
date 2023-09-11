@@ -89,8 +89,6 @@ const (
 )
 
 func setDAGProperties(def *configDefinition, d *DAG) {
-
-	fmt.Println(def.Nfty)
 	d.Name = def.Name
 	if def.Name != "" {
 		d.Name = def.Name
