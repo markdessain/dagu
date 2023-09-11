@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -21,11 +22,17 @@ type Reporter struct {
 // Config is the configuration for the reporter.
 type Config struct {
 	Mailer Mailer
+	Nfty   Nfty
 }
 
 // Mailer is a mailer interface.
 type Mailer interface {
 	SendMail(from string, to []string, subject, body string) error
+}
+
+// Nfty is a nfty interface.
+type Nfty interface {
+	SendNotification(topic string, subject, body string, url string) error
 }
 
 // ReportStep is a function that reports the status of a step.
@@ -79,6 +86,49 @@ func (rp *Reporter) SendMail(d *dag.DAG, status *models.Status, err error) error
 		}
 	}
 	return nil
+}
+
+// SendNotification is a function that sends a report mail.
+func (rp *Reporter) SendNotification(d *dag.DAG, status *models.Status, err error) error {
+	parts := strings.Split(strings.ReplaceAll(d.Location, ".yaml", ""), "/")
+	url := os.Getenv("SERVER_URL") + "/dags/" + parts[len(parts)-1] + "/history"
+
+	if err != nil || status.Status == scheduler.SchedulerStatus_Error {
+
+		if d.NotificationOn != nil && d.NotificationOn.Failure {
+			return rp.Nfty.SendNotification(
+				d.ErrorTopic.Topic,
+				fmt.Sprintf("%s (%s)", d.Name, status.Status),
+				renderErrorNotificaiton(status, err),
+				url,
+			)
+		}
+	} else if status.Status == scheduler.SchedulerStatus_Success {
+
+		if d.NotificationOn != nil && d.NotificationOn.Success {
+			return rp.Nfty.SendNotification(
+				d.InfoTopic.Topic,
+				fmt.Sprintf("%s (%s)", d.Name, status.Status),
+				"",
+				url,
+			)
+		}
+	}
+	return nil
+}
+
+func renderErrorNotificaiton(status *models.Status, err error) string {
+	message := ""
+
+	for _, node := range status.Nodes {
+		if node.StatusText == "failed" {
+			message = message + "**" + node.Name + "**\n"
+			message = message + "```\n" + node.Error + "\n```\n\n"
+		}
+	}
+
+	return message
+
 }
 
 func renderSummary(status *models.Status, err error) string {

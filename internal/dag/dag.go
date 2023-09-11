@@ -25,7 +25,11 @@ type DAG struct {
 	LogDir            string
 	HandlerOn         HandlerOn
 	Steps             []*Step
+	NotificationOn    *NotificationOn
+	Nfty              *NftyConfig
 	MailOn            *MailOn
+	ErrorTopic        *TopicConfig
+	InfoTopic         *TopicConfig
 	ErrorMail         *MailConfig
 	InfoMail          *MailConfig
 	Smtp              *SmtpConfig
@@ -50,6 +54,11 @@ type HandlerOn struct {
 	Success *Step
 	Cancel  *Step
 	Exit    *Step
+}
+
+type NotificationOn struct {
+	Failure bool
+	Success bool
 }
 
 type MailOn struct {

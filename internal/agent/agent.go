@@ -204,6 +204,14 @@ func (a *Agent) init() {
 					Password: a.DAG.Smtp.Password,
 				},
 			},
+			Nfty: &mailer.Nfty{
+				Config: &mailer.Config{
+					Host:     a.DAG.Nfty.Host,
+					Port:     a.DAG.Nfty.Port,
+					Username: a.DAG.Nfty.Username,
+					Password: a.DAG.Nfty.Password,
+				},
+			},
 		}}
 	logFilename := filepath.Join(
 		logDir, fmt.Sprintf("agent_%s.%s.%s.log",
@@ -337,6 +345,7 @@ func (a *Agent) run(ctx context.Context) error {
 
 	a.reporter.ReportSummary(status, lastErr)
 	utils.LogErr("send email", a.reporter.SendMail(a.DAG, status, lastErr))
+	utils.LogErr("send notification", a.reporter.SendNotification(a.DAG, status, lastErr))
 
 	utils.LogErr("close data file", a.dbManager.dbWriter.Close())
 	utils.LogErr("data compaction", a.database.Compact(a.DAG.Location, a.dbManager.dbFile))

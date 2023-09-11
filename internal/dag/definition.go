@@ -10,8 +10,12 @@ type configDefinition struct {
 	HandlerOn         handerOnDef
 	Functions         []*funcDef
 	Steps             []*stepDef
+	NotificationOn    *notificationOnDef
+	Nfty              nftyConfigDef
 	Smtp              smtpConfigDef
 	MailOn            *mailOnDef
+	ErrorTopic        topicConfigDef
+	InfoTopic         topicConfigDef
 	ErrorMail         mailConfigDef
 	InfoMail          mailConfigDef
 	DelaySec          int
@@ -90,10 +94,26 @@ type smtpConfigDef struct {
 	Password string
 }
 
+type nftyConfigDef struct {
+	Host     string
+	Port     string
+	Username string
+	Password string
+}
+
 type mailConfigDef struct {
 	From   string
 	To     string
 	Prefix string
+}
+
+type notificationOnDef struct {
+	Failure bool
+	Success bool
+}
+
+type topicConfigDef struct {
+	Topic string
 }
 
 type mailOnDef struct {

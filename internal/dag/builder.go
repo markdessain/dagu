@@ -68,9 +68,12 @@ func buildAll(def *configDefinition, d *DAG, options BuildDAGOptions) error {
 	errList.Add(buildSteps(def, d, options))
 	errList.Add(buildHandlers(def, d, options))
 	errList.Add(buildConfig(def, d))
+	errList.Add(buildNftyConfig(def, d))
 	errList.Add(buildSMTPConfig(def, d))
 	errList.Add(buildErrMailConfig(def, d))
 	errList.Add(buildInfoMailConfig(def, d))
+	errList.Add(buildErrTopicConfig(def, d))
+	errList.Add(buildInfoTopicConfig(def, d))
 
 	if errList.HasErrors() {
 		return errList
@@ -86,6 +89,8 @@ const (
 )
 
 func setDAGProperties(def *configDefinition, d *DAG) {
+
+	fmt.Println(def.Nfty)
 	d.Name = def.Name
 	if def.Name != "" {
 		d.Name = def.Name
@@ -96,6 +101,12 @@ func setDAGProperties(def *configDefinition, d *DAG) {
 		d.MailOn = &MailOn{
 			Failure: def.MailOn.Failure,
 			Success: def.MailOn.Success,
+		}
+	}
+	if def.NotificationOn != nil {
+		d.NotificationOn = &NotificationOn{
+			Failure: def.NotificationOn.Failure,
+			Success: def.NotificationOn.Success,
 		}
 	}
 	d.Delay = time.Second * time.Duration(def.DelaySec)
@@ -500,6 +511,16 @@ func convertMap(m map[string]interface{}) error {
 	return nil
 }
 
+func buildNftyConfig(def *configDefinition, d *DAG) (err error) {
+	nfty := &NftyConfig{}
+	nfty.Host = os.ExpandEnv(def.Nfty.Host)
+	nfty.Port = os.ExpandEnv(def.Nfty.Port)
+	nfty.Username = os.ExpandEnv(def.Nfty.Username)
+	nfty.Password = os.ExpandEnv(def.Nfty.Password)
+	d.Nfty = nfty
+	return nil
+}
+
 func buildSMTPConfig(def *configDefinition, d *DAG) (err error) {
 	smtp := &SmtpConfig{}
 	smtp.Host = os.ExpandEnv(def.Smtp.Host)
@@ -525,6 +546,22 @@ func buildMailConfigFromDefinition(def mailConfigDef) (*MailConfig, error) {
 	d.From = def.From
 	d.To = def.To
 	d.Prefix = def.Prefix
+	return d, nil
+}
+
+func buildErrTopicConfig(def *configDefinition, d *DAG) (err error) {
+	d.ErrorTopic, err = buildTopicConfigFromDefinition(def.ErrorTopic)
+	return
+}
+
+func buildInfoTopicConfig(def *configDefinition, d *DAG) (err error) {
+	d.InfoTopic, err = buildTopicConfigFromDefinition(def.InfoTopic)
+	return
+}
+
+func buildTopicConfigFromDefinition(def topicConfigDef) (*TopicConfig, error) {
+	d := &TopicConfig{}
+	d.Topic = def.Topic
 	return d, nil
 }
 
