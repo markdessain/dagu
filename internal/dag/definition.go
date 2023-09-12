@@ -8,7 +8,7 @@ type configDefinition struct {
 	LogDir            string
 	Env               interface{}
 	HandlerOn         handerOnDef
-	Functions         []*funcDef
+	Functions         []*stepDef
 	Steps             []*stepDef
 	NotificationOn    *notificationOnDef
 	Nfty              nftyConfigDef
@@ -59,12 +59,6 @@ type stepDef struct {
 	SignalOnStop  *string
 	Env           string
 	Call          *callFuncDef
-}
-
-type funcDef struct {
-	Name    string
-	Params  string
-	Command string
 }
 
 type callFuncDef struct {

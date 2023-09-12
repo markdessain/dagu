@@ -87,6 +87,11 @@ func (n *Node) Execute(ctx context.Context) error {
 	ctx, fn := context.WithCancel(ctx)
 	n.cancelFunc = fn
 
+	for _, v := range n.Variables {
+		vsplit := strings.Split(v, "=")
+		n.CmdWithArgs = strings.ReplaceAll(n.CmdWithArgs, "$"+vsplit[0], vsplit[1])
+	}
+
 	if n.CmdWithArgs != "" {
 		n.Command, n.Args = utils.SplitCommand(n.CmdWithArgs, true)
 	}
