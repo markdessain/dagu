@@ -355,9 +355,15 @@ func buildStep(variables []string, def *stepDef, funcs []*stepDef, options Build
 	step.Depends = def.Depends
 	step.Output = def.Output
 
+	variablesNew := []string{}
+
+	for _, v := range variables {
+		variablesNew = append(variablesNew, v)
+	}
+
 	if def.Call != nil {
 		for k, v := range def.Call.Args {
-			variables = append(variables, k+"="+fmt.Sprintf("%v", v))
+			variablesNew = append(variablesNew, k+"="+fmt.Sprintf("%v", v))
 		}
 
 		calledFuncDef := &stepDef{}
@@ -424,7 +430,7 @@ func buildStep(variables []string, def *stepDef, funcs []*stepDef, options Build
 	}
 
 	// TODO: validate executor config
-	step.Variables = variables
+	step.Variables = variablesNew
 	if def.ContinueOn != nil {
 		step.ContinueOn.Skipped = def.ContinueOn.Skipped
 		step.ContinueOn.Failure = def.ContinueOn.Failure
