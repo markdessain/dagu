@@ -7,6 +7,7 @@ type configDefinition struct {
 	Schedule          interface{}
 	LogDir            string
 	Env               interface{}
+	EnvFile           string
 	HandlerOn         handerOnDef
 	Functions         []*stepDef
 	Steps             []*stepDef

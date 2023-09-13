@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/robfig/cron/v3"
 	"github.com/yohamta/dagu/internal/constants"
 	"github.com/yohamta/dagu/internal/errors"
@@ -163,7 +164,19 @@ func buildEnvs(def *configDefinition, d, base *DAG, options BuildDAGOptions) (er
 				}
 			}
 		}
+	} else {
+		return
 	}
+
+	envFileResult, err := godotenv.Read(def.EnvFile)
+	if err == nil {
+		for k, v := range envFileResult {
+			d.Env = append(d.Env, k+"="+v)
+		}
+	} else {
+		return
+	}
+
 	return
 }
 
