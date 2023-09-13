@@ -168,13 +168,13 @@ func buildEnvs(def *configDefinition, d, base *DAG, options BuildDAGOptions) (er
 		return
 	}
 
-	envFileResult, err := godotenv.Read(def.EnvFile)
-	if err == nil {
-		for k, v := range envFileResult {
-			d.Env = append(d.Env, k+"="+v)
+	if def.EnvFile != "" {
+		envFileResult, err := godotenv.Read(def.EnvFile)
+		if err == nil {
+			for k, v := range envFileResult {
+				d.Env = append(d.Env, k+"="+v)
+			}
 		}
-	} else {
-		return
 	}
 
 	return
